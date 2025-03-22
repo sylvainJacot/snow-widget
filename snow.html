@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neige Modernisée avec Accumulation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #787878;
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body style="display: flex; flex-direction: column; align-items: center;">
+    <h1 style="display: inline-block;">Bienvenue sur mon site</h1>
+    <p>Du texte pour tester l’effet.</p>
+    <h1 style="display: inline-block;">Autre titre</h1>
+    <h1 style="display: inline-block;">Encore un titre</h1>
+    <h1 style="display: inline-block;">Encore un titre</h1>
+    <h1 style="display: inline-block;">Encore un titre</h1>    
+
+    <script>
+        const snowStorm = (function (window, document) {
+            // Configuration par défaut
+            const config = {
+                autoStart: true,
+                excludeMobile: true,
+                flakesMax: 128,
+                flakesMaxActive: 64,
+                useGPU: true,
+                snowColor: '#fff',
+                snowCharacter: '•',
+                snowStick: true,
+                useMeltEffect: true,
+                useTwinkleEffect: false,
+                followMouse: false,
+                freezeOnBlur: true,
+                flakeWidth: 8,
+                flakeHeight: 8,
+                vMaxX: 5,
+                vMaxY: 4,
+                zIndex: 9999
+            };
+
+            // Variables globales
+            let canvas, ctx, flocons = [], animationFrameId;
+            let scrollY = 0;
+            let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            let windOffset = 1;
+            let h1Rects = [];
+
+            // Créer le canvas
+            function createCanvas() {
+                canvas = document.createElement("canvas");
+                document.body.appendChild(canvas);
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                ctx = canvas.getContext("2d");
+            }
+
+            // Mettre à jour les positions des <h1>
+            function updateH1Rects() {
+                const h1Elements = document.querySelectorAll("h1");
+                h1Rects = Array.from(h1Elements).map(h1 => {
+                    const rect = h1.getBoundingClientRect();
+                    return {
+                        left: rect.left,
+                        right: rect.right,
+                        top: rect.top + window.scrollY,
+                        bottom: rect.bottom + window.scrollY
+                    };
+                });
+            }
+
+            // Créer un flocon avec un <h1> assigné aléatoirement
+            function createFlocon() {
+                const h1Index = Math.floor(Math.random() * h1Rects.length);
+                return {
+                    x: Math.random() * canvas.width,
+                    y: -config.flakeHeight,
+                    vX: (Math.random() - 0.5) * config.vMaxX,
+                    vY: Math.random() * config.vMaxY + 1,
+                    rayon: Math.random() * 3 + 2,
+                    active: true,
+                    accumule: false,
+                    meltFrame: 0,
+                    twinkleFrame: 0,
+                    h1Cible: h1Index // Index du <h1> assigné
+                };
+            }
+
+            // Vérifier si le flocon touche son <h1> assigné
+            function estSurSonH1(flocon) {
+                const rect = h1Rects[flocon.h1Cible];
+                return flocon.x >= rect.left && flocon.x <= rect.right &&
+                       flocon.y >= rect.top && flocon.y <= rect.bottom;
+            }
+
+            // Animer les flocons
+            function animer() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                updateH1Rects(); // Recalculer les positions des <h1>
+
+                flocons.forEach(flocon => {
+                    if (flocon.active && !flocon.accumule) {
+                        // Mouvement
+                        flocon.x += flocon.vX * windOffset;
+                        flocon.y += flocon.vY;
+
+                        // Vérifier collision avec son <h1> assigné
+                        if (config.snowStick && estSurSonH1(flocon)) {
+                            flocon.accumule = true;
+                            flocon.y = h1Rects[flocon.h1Cible].top; // S’arrête au sommet du <h1>
+                        }
+
+                        // Réinitialiser si hors écran
+                        if (flocon.y > canvas.height) {
+                            recycleFlocon(flocon);
+                        }
+                    }
+
+                    // Effet de fonte
+                    if (config.useMeltEffect && flocon.active && Math.random() > 0.998) {
+                        flocon.meltFrame = 1;
+                    }
+                    if (flocon.meltFrame > 0) {
+                        flocon.rayon -= 0.2;
+                        flocon.meltFrame++;
+                        if (flocon.rayon <= 0) recycleFlocon(flocon);
+                    }
+
+                    // Effet de scintillement
+                    if (config.useTwinkleEffect) {
+                        if (flocon.twinkleFrame > 0) {
+                            flocon.twinkleFrame--;
+                        } else if (Math.random() > 0.97) {
+                            flocon.twinkleFrame = Math.floor(Math.random() * 8);
+                        }
+                    }
+
+                    // Dessiner le flocon
+                    ctx.beginPath();
+                    ctx.arc(flocon.x, flocon.y, flocon.rayon, 0, Math.PI * 2);
+                    ctx.fillStyle = config.snowColor;
+                    ctx.globalAlpha = flocon.twinkleFrame % 2 === 0 ? 0.5 : 1;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                });
+
+                animationFrameId = requestAnimationFrame(animer);
+            }
+
+            // Recycler un flocon
+            function recycleFlocon(flocon) {
+                flocon.x = Math.random() * canvas.width;
+                flocon.y = -config.flakeHeight;
+                flocon.vX = (Math.random() - 0.5) * config.vMaxX;
+                flocon.vY = Math.random() * config.vMaxY + 1;
+                flocon.rayon = Math.random() * 3 + 2;
+                flocon.active = true;
+                flocon.accumule = false;
+                flocon.meltFrame = 0;
+                flocon.twinkleFrame = 0;
+                flocon.h1Cible = Math.floor(Math.random() * h1Rects.length); // Nouvel <h1> aléatoire
+            }
+
+            // Initialiser les flocons
+            function initFlocons() {
+                updateH1Rects();
+                for (let i = 0; i < config.flakesMax; i++) {
+                    flocons.push(createFlocon());
+                    if (i >= config.flakesMaxActive) flocons[i].active = false;
+                }
+            }
+
+            // Gérer le redimensionnement
+            function handleResize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            // Gérer le scroll
+            function handleScroll() {
+                scrollY = window.scrollY;
+            }
+
+            // Gérer le mouvement de la souris
+            function handleMouseMove(e) {
+                if (!config.followMouse) return;
+                const x = e.clientX;
+                const mid = canvas.width / 2;
+                windOffset = x < mid ? -1 + (x / mid) : (x - mid) / mid;
+            }
+
+            // Démarrer l’effet
+            function start() {
+                if (config.excludeMobile && isMobile) return;
+                createCanvas();
+                initFlocons();
+                animer();
+                window.addEventListener('resize', handleResize);
+                window.addEventListener('scroll', handleScroll);
+                if (config.followMouse) window.addEventListener('mousemove', handleMouseMove);
+                if (config.freezeOnBlur) {
+                    window.addEventListener('blur', stop);
+                    window.addEventListener('focus', resume);
+                }
+            }
+
+            // Arrêter l’effet
+            function stop() {
+                cancelAnimationFrame(animationFrameId);
+            }
+
+            // Reprendre l’effet
+            function resume() {
+                if (!animationFrameId) animer();
+            }
+
+            // Démarrage automatique
+            if (config.autoStart) {
+                window.addEventListener('load', start);
+            }
+
+            // Méthodes publiques
+            return {
+                start,
+                stop,
+                config
+            };
+        })(window, document);
+    </script>
+</body>
+</html>
