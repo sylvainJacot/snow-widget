@@ -29,6 +29,61 @@
     <h1 style="display: inline-block; margin-bottom: 300px;">Encore un titre</h1> 
     <h1 style="display: inline-block; margin-bottom: 300px;">Encore un titre</h1>    
 
+    <div id="controls" style="position: fixed; top: 20px; left: 20px; background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); z-index: 10000;">
+    <h3 style="margin: 0 0 10px 0;">Contrôles de Neige</h3>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div>
+            <label>Taille max flocons: <br>
+                <input type="range" id="flakeSize" min="1" max="20" step="1" style="width: 120px;">
+                <span id="flakeSizeValue">8</span>
+            </label>
+        </div>
+        
+        <div>
+            <label>Quantité max: <br>
+                <input type="range" id="flakesMax" min="50" max="500" step="50" style="width: 120px;">
+                <span id="flakesMaxValue">200</span>
+            </label>
+        </div>
+        
+        <div>
+            <label>Couleur: <br>
+                <input type="color" id="snowColor" value="#ffffff">
+            </label>
+        </div>
+        
+        <div>
+            <label>Vitesse X: <br>
+                <input type="range" id="vMaxX" min="1" max="10" step="1" style="width: 120px;">
+                <span id="vMaxXValue">5</span>
+            </label>
+        </div>
+        
+        <div>
+            <label>Vitesse Y: <br>
+                <input type="range" id="vMaxY" min="1" max="10" step="1" style="width: 120px;">
+                <span id="vMaxYValue">4</span>
+            </label>
+        </div>
+        
+        <div>
+            <label>
+                <input type="checkbox" id="snowStick" checked> Accumulation
+            </label>
+        </div>
+        
+        <div>
+            <label>
+                <input type="checkbox" id="useMeltEffect" checked> Fonte
+            </label>
+        </div>
+    </div>
+    
+    <button onclick="document.getElementById('controls').style.display = 'none';">Fermer</button>
+</div>
+
+
     <script>
         const snowStorm = (function (window, document) {
             // Configuration par défaut
@@ -407,6 +462,54 @@
                 config
             };
         })(window, document);
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    const controls = {
+        flakeSize: document.getElementById("flakeSize"),
+        flakesMax: document.getElementById("flakesMax"),
+        snowColor: document.getElementById("snowColor"),
+        vMaxX: document.getElementById("vMaxX"),
+        vMaxY: document.getElementById("vMaxY"),
+        snowStick: document.getElementById("snowStick"),
+        useMeltEffect: document.getElementById("useMeltEffect"),
+    };
+
+    const displayValues = {
+        flakeSize: document.getElementById("flakeSizeValue"),
+        flakesMax: document.getElementById("flakesMaxValue"),
+        vMaxX: document.getElementById("vMaxXValue"),
+        vMaxY: document.getElementById("vMaxYValue"),
+    };
+
+    function updateConfig() {
+        snowStorm.flakesMax = parseInt(controls.flakesMax.value, 10);
+        snowStorm.flakeWidth = snowStorm.flakeHeight = parseInt(controls.flakeSize.value, 10);
+        snowStorm.snowColor = controls.snowColor.value;
+        snowStorm.vMaxX = parseInt(controls.vMaxX.value, 10);
+        snowStorm.vMaxY = parseInt(controls.vMaxY.value, 10);
+        snowStorm.snowStick = controls.snowStick.checked;
+        snowStorm.useMeltEffect = controls.useMeltEffect.checked;
+
+        // Met à jour les valeurs affichées
+        displayValues.flakeSize.textContent = controls.flakeSize.value;
+        displayValues.flakesMax.textContent = controls.flakesMax.value;
+        displayValues.vMaxX.textContent = controls.vMaxX.value;
+        displayValues.vMaxY.textContent = controls.vMaxY.value;
+
+        // Relancer la neige pour appliquer les changements
+        snowStorm.stop();
+        snowStorm.start();
+    }
+
+    // Écouteurs pour chaque input
+    Object.keys(controls).forEach((key) => {
+        controls[key].addEventListener("input", updateConfig);
+    });
+
+    // Initialisation avec les valeurs actuelles
+    updateConfig();
+});
     </script>
 </body>
 </html>
