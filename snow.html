@@ -21,14 +21,14 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div>
                 <label>Taille max flocons: <br>
-                    <input type="range" id="flakeSize" min="1" max="20" step="1" style="width: 120px;">
+                    <input type="range" id="flakeSize" min="1" max="100" step="1" value="8" style="width: 120px;">
                     <span id="flakeSizeValue">8</span>
                 </label>
             </div>  
             
-            <div class="control-item">
+             <div>
                 <label>Quantité max: <br>
-                    <input type="range" id="flakesMax" min="50" max="500" step="50" style="width: 120px;">
+                    <input type="range" id="flakesMax" min="10" max="2000" step="50" value="200" style="width: 120px;">
                     <span id="flakesMaxValue">200</span>
                 </label>
             </div>
@@ -39,32 +39,35 @@
                 </label>
             </div>
             
+            
             <div>
-                <label>Vitesse X: <br>
-                    <input type="range" id="vMaxX" min="1" max="10" step="1" style="width: 120px;">
-                    <span id="vMaxXValue">5</span>
+                <label>Vitesse: <br>
+                    <input type="range" id="Vitesse" min="1" max="10" step=".5" value="2" style="width: 120px;">
+                    <span id="VitesseValue">5</span>
                 </label>
             </div>
             
-            <div>
-                <label>Vitesse Y: <br>
-                    <input type="range" id="vMaxY" min="1" max="10" step="1" style="width: 120px;">
-                    <span id="vMaxYValue">4</span>
-                </label>
-            </div>
+
             
             <div>
-                <label>
-                    <input type="checkbox" id="snowStick" checked> Accumulation
+                <label>Snow Stick: <br>
+                    <input type="checkbox" id="snowStick" checked>
                 </label>
             </div>
+
+            <div>
+                <label>Follow Mouse: <br>
+                    <input type="checkbox" id="followMouse" checked>
+                </label>
+            </div>
+
             
             <div>
                 <label>
                     <input type="checkbox" id="useMeltEffect" checked> Fonte
                 </label>
             </div>
-        </div>
+        </div> 
         
         <button onclick="document.getElementById('controls').style.display = 'none';">Fermer</button>
     </div>

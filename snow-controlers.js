@@ -1,37 +1,56 @@
+// Gestion du panneau de contrôle (simplifié avec flakeSize)
 document.addEventListener("DOMContentLoaded", function () {
     const controls = {
         flakeSize: document.getElementById("flakeSize"),
-        // flakesMax: document.getElementById("flakesMax"),
-        // snowColor: document.getElementById("snowColor"),
-        // vMaxX: document.getElementById("vMaxX"),
-        // vMaxY: document.getElementById("vMaxY"),
-        // snowStick: document.getElementById("snowStick"),
-        // useMeltEffect: document.getElementById("useMeltEffect"),
+        flakesMax: document.getElementById("flakesMax"),
+        snowColor: document.getElementById("snowColor"),
+        VitesseValue: document.getElementById("Vitesse"),
+        snowStick: document.getElementById("snowStick"),
+        followMouse: document.getElementById("followMouse"),
+        useMeltEffect: document.getElementById("useMeltEffect"),
     };
-
     const displayValues = {
         flakeSize: document.getElementById("flakeSizeValue"),
-        // flakesMax: document.getElementById("flakesMaxValue"),
-        // vMaxX: document.getElementById("vMaxXValue"),
-        // vMaxY: document.getElementById("vMaxYValue"),
+        flakesMax: document.getElementById("flakesMaxValue"),
+        VitesseValue: document.getElementById("VitesseValue"),
+        snowStick: document.getElementById("snowStick"),
+        followMouse: document.getElementById("followMouse"),
+        useMeltEffect: document.getElementById("useMeltEffect"),
     };
 
     function updateConfig() {
-        // snowStorm.flakesMax = parseInt(controls.flakesMax.value, 10);
-        // snowStorm.flakeWidth = snowStorm.flakeHeight = parseInt(controls.flakeSize.value, 10);
-        // snowStorm.snowColor = controls.snowColor.value;
-        // snowStorm.vMaxX = parseInt(controls.vMaxX.value, 10);
-        // snowStorm.vMaxY = parseInt(controls.vMaxY.value, 10);
-        // snowStorm.snowStick = controls.snowStick.checked;
-        // snowStorm.useMeltEffect = controls.useMeltEffect.checked;
-
-        // Met à jour les valeurs affichées
+        // Taille des flocons
+        snowStorm.config.flakeWidth = parseInt(controls.flakeSize.value, 10);
+        snowStorm.config.flakeHeight = parseInt(controls.flakeSize.value, 10);
         displayValues.flakeSize.textContent = controls.flakeSize.value;
-        // displayValues.flakesMax.textContent = controls.flakesMax.value;
-        // displayValues.vMaxX.textContent = controls.vMaxX.value;
-        // displayValues.vMaxY.textContent = controls.vMaxY.value;
 
-        // Relancer la neige pour appliquer les changements
+        // Couleur
+        snowStorm.config.snowColor = controls.snowColor.value;
+
+        // Quantité max
+        snowStorm.config.flakesMax = parseInt(controls.flakesMax.value, 10);
+        displayValues.flakesMax.textContent = controls.flakesMax.value;
+
+        // Vitesse max X
+        snowStorm.config.vMaxX = parseInt(controls.VitesseValue.value, 10);
+        displayValues.VitesseValue.textContent = controls.VitesseValue.value;
+
+        // Vitesse max Y
+        snowStorm.config.vMaxY = parseInt(controls.VitesseValue.value, 10);
+        displayValues.VitesseValue.textContent = controls.VitesseValue.value;
+
+        // Snow Stick
+        snowStorm.config.snowStick = controls.snowStick.checked;
+        displayValues.snowStick.textContent = controls.snowStick.checked
+
+        // Follow Mouse
+        snowStorm.config.followMouse = controls.followMouse.checked;
+        displayValues.followMouse.textContent = controls.followMouse.checked
+
+        // Fonte
+        snowStorm.config.useMeltEffect = controls.useMeltEffect.checked;
+        displayValues.useMeltEffect.textContent = controls.useMeltEffect.checked
+
         snowStorm.stop();
         snowStorm.start();
     }
@@ -40,7 +59,5 @@ document.addEventListener("DOMContentLoaded", function () {
     Object.keys(controls).forEach((key) => {
         controls[key].addEventListener("input", updateConfig);
     });
-
-    // Initialisation avec les valeurs actuelles
     updateConfig();
 });
