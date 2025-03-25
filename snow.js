@@ -30,6 +30,11 @@ const snowStorm = (function (window, document) {
         if (!canvas) {
             canvas = document.createElement("canvas");
             canvas.id = "snowCanvas";
+            canvas.style.position = "fixed";
+            canvas.style.top = "0";
+            canvas.style.left = "0";
+            canvas.style.pointerEvents = "none";
+            canvas.style.zIndex = 100000;
             document.body.appendChild(canvas);
         }
         canvas.width = window.innerWidth;
