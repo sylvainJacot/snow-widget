@@ -10,8 +10,8 @@ const snowStorm = (function (window, document) {
         // useTwinkleEffect: false, // plus tard
         // followMouse: false, // plus tard
         // freezeOnBlur: false, // plus tard
-        flakeWidth: 1,
-        flakeHeight: 1,
+        flakeWidth: 3,
+        flakeHeight: 3,
         vMaxX: 2,
         vMaxY: 2,
         zIndex: 9999,
