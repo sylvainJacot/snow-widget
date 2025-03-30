@@ -350,9 +350,25 @@ const snowStorm = (function (window, document) {
         animationFrameId = null;
     }
 
+    // Nouvelle fonction pour mettre à jour la configuration dynamiquement
+    function updateConfig(newConfig) {
+        const oldFlakesMax = config.flakesMax;
+        config = { ...config, ...newConfig }; // Fusionner avec les nouveaux paramètres
+
+        // Si flakesMax a changé, réinitialiser les flocons
+        if (config.flakesMax !== oldFlakesMax) {
+            initFlocons();
+        }
+
+        // Redémarrer l'animation avec la nouvelle configuration
+        stop();
+        start();
+    }
+
     return {
         start,
         stop,
+        updateConfig, // Exposer la fonction updateConfig
         get config() { return config; }
     };
 })(window, document);
