@@ -1,5 +1,7 @@
 const snowStorm = (function (window, document) {
-    const config = {
+    // Configuration par défaut
+    const defaultConfig = {
+        version: 1,
         autoStart: true,
         excludeMobile: true,
         flakesMax: 200,
@@ -7,9 +9,9 @@ const snowStorm = (function (window, document) {
         snowColor: '#fff',
         snowStick: true,
         useMeltEffect: false,
-        // useTwinkleEffect: false, // plus tard
-        // followMouse: false, // plus tard
-        // freezeOnBlur: false, // plus tard
+        // useTwinkleEffect: false, // À implémenter plus tard
+        // followMouse: false, // À implémenter plus tard
+        // freezeOnBlur: false, // À implémenter plus tard
         flakeWidth: 3,
         flakeHeight: 3,
         vMaxX: 2,
@@ -18,12 +20,70 @@ const snowStorm = (function (window, document) {
         checkForHitEveryPixel: 2
     };
 
+    // Variable pour stocker la configuration dynamique
+    let config = { ...defaultConfig };
+
     let canvas, ctx, flocons = [], animationFrameId;
     let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     let windOffset = 1;
     let h1Elements = [];
     let accumulatedSnow = [];
     let documentHeight = 0;
+
+    // Récupérer les paramètres de l’URL du script
+    function getUrlParams() {
+        const params = {};
+        const script = document.currentScript;
+        if (script && script.src) {
+            const url = new URL(script.src);
+            url.searchParams.forEach((value, key) => {
+                params[key] = value;
+            });
+        }
+        return params;
+    }
+
+    // Récupérer la configuration depuis Supabase
+    async function fetchConfig(token) {
+        const response = await fetch(`https://ijgyqpqtsauyluefxvvb.supabase.co/functions/v1/get-config?token=${token}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch configuration');
+        }
+        return response.json();
+    }
+
+    // Charger la configuration dynamiquement
+    async function loadConfig() {
+        const params = getUrlParams();
+        let userConfig;
+
+        if (params.preview === 'true' && params.config) {
+            // Mode preview : configuration encodée dans l’URL
+            userConfig = JSON.parse(decodeURIComponent(params.config));
+        } else if (params.token) {
+            // Mode live : récupération depuis Supabase
+            try {
+                userConfig = await fetchConfig(params.token);
+            } catch (error) {
+                console.error('Erreur lors de la récupération de la configuration :', error);
+                return defaultConfig;
+            }
+        } else {
+            console.error('Aucun token ou configuration preview fourni');
+            return defaultConfig;
+        }
+
+        // Fusionner avec la configuration par défaut
+        return { ...defaultConfig, ...userConfig };
+    }
+
+    // Initialisation asynchrone de la configuration
+    (async function () {
+        config = await loadConfig();
+        if (config.autoStart && (!config.excludeMobile || !isMobile)) {
+            start();
+        }
+    })();
 
     function createCanvas() {
         canvas = document.getElementById("snowCanvas") || null;
@@ -34,12 +94,12 @@ const snowStorm = (function (window, document) {
             canvas.style.top = "0";
             canvas.style.left = "0";
             canvas.style.pointerEvents = "none";
-            canvas.style.zIndex = 100000;
+            canvas.style.zIndex = config.zIndex;
             document.body.appendChild(canvas);
         }
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        ctx = canvas.getContext("2d");
+        ctx = canvas.getContext("2d", { alpha: true });
     }
 
     function updateH1Elements() {
@@ -76,7 +136,7 @@ const snowStorm = (function (window, document) {
             y: startY,
             vX: (Math.random() - 0.5) * config.vMaxX,
             vY: Math.random() * config.vMaxY,
-            rayon: Math.random() * config.flakeWidth, // Utilise la nouvelle taille
+            rayon: Math.random() * config.flakeWidth,
             active: true,
             accumule: false,
             meltFrame: 0,
@@ -148,22 +208,12 @@ const snowStorm = (function (window, document) {
                 }
             }
 
-            if (config.useTwinkleEffect) {
-                if (flocon.twinkleFrame > 0) {
-                    flocon.twinkleFrame--;
-                } else if (Math.random() > 0.97) {
-                    flocon.twinkleFrame = Math.floor(Math.random() * 8);
-                }
-            }
-
             if (flocon.active && !flocon.accumule &&
                 flocon.y >= viewTop - 100 && flocon.y <= viewBottom + 100) {
                 ctx.beginPath();
                 ctx.arc(flocon.x, flocon.y - viewTop, flocon.rayon, 0, Math.PI * 2);
                 ctx.fillStyle = config.snowColor;
-                ctx.globalAlpha = flocon.twinkleFrame % 2 === 0 ? 0.5 : 1;
                 ctx.fill();
-                ctx.globalAlpha = 1;
             }
         });
 
@@ -178,9 +228,7 @@ const snowStorm = (function (window, document) {
                 ctx.beginPath();
                 ctx.arc(snowX, snowY, flocon.rayon, 0, Math.PI * 2);
                 ctx.fillStyle = config.snowColor;
-                ctx.globalAlpha = flocon.twinkleFrame % 2 === 0 ? 0.5 : 1;
                 ctx.fill();
-                ctx.globalAlpha = 1;
             }
         });
 
@@ -220,7 +268,7 @@ const snowStorm = (function (window, document) {
         flocon.y = newPos.y;
         flocon.vX = (Math.random() - 0.5) * config.vMaxX;
         flocon.vY = Math.random() * config.vMaxY + 1;
-        flocon.rayon = Math.random() * config.flakeWidth; // Mise à jour avec la nouvelle taille
+        flocon.rayon = Math.random() * config.flakeWidth;
         flocon.active = true;
         flocon.meltFrame = 0;
         flocon.twinkleFrame = 0;
@@ -252,8 +300,8 @@ const snowStorm = (function (window, document) {
 
     function initFlocons() {
         updateH1Elements();
-        flocons = []; // Réinitialiser le tableau des flocons
-        accumulatedSnow = []; // Réinitialiser les flocons accumulés
+        flocons = [];
+        accumulatedSnow = [];
 
         for (let i = 0; i < config.flakesMax; i++) {
             const newFlake = createFlocon();
@@ -285,8 +333,7 @@ const snowStorm = (function (window, document) {
         initFlocons();
         animer();
 
-        // Ajouter les écouteurs uniquement s'ils ne sont pas déjà ajoutés
-        window.removeEventListener('resize', handleResize); // Retirer avant d'ajouter
+        window.removeEventListener('resize', handleResize);
         window.addEventListener('resize', handleResize);
 
         window.removeEventListener('scroll', updateH1Elements);
@@ -296,31 +343,16 @@ const snowStorm = (function (window, document) {
             window.removeEventListener('mousemove', handleMouseMove);
             window.addEventListener('mousemove', handleMouseMove);
         }
-        if (config.freezeOnBlur) {
-            window.removeEventListener('blur', stop);
-            window.removeEventListener('focus', resume);
-            window.addEventListener('blur', stop);
-            window.addEventListener('focus', resume);
-        }
     }
 
     function stop() {
         cancelAnimationFrame(animationFrameId);
-        animationFrameId = null; // Réinitialiser pour éviter les conflits
-    }
-
-    function resume() {
-        if (!animationFrameId) animer();
-    }
-
-    if (config.autoStart) {
-        window.addEventListener('load', start);
+        animationFrameId = null;
     }
 
     return {
         start,
         stop,
-        config
+        get config() { return config; }
     };
 })(window, document);
-
