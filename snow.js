@@ -1,4 +1,4 @@
-const snowStorm = (function (window, document) {
+window.snowStorm = (function (window, document) {
     // Configuration par défaut
     const defaultConfig = {
         version: 1,
