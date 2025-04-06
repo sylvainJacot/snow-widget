@@ -49,14 +49,17 @@ window.snowStorm = (function (window, document) {
             `https://ijgyqpqtsauyluefxvvb.supabase.co/functions/v1/get-config?token=${token}`,
             {
                 headers: {
-                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZ3lxcHF0c2F1eWx1ZWZ4dnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMxMDMyMTcsImV4cCI6MjA1ODY3OTIxN30.fn6Uc1EWGeMbGufBQWQzCLHFSI_ElmA8-ZjOMJL2raM' // Remplacez par votre clé API
+                    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqZ3lxcHF0c2F1eWx1ZWZ4dnZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMxMDMyMTcsImV4cCI6MjA1ODY3OTIxN30.fn6Uc1EWGeMbGufBQWQzCLHFSI_ElmA8-ZjOMJL2raM'
                 }
             }
         );
         if (!response.ok) {
+            console.error('Réponse API non valide :', response.status, response.statusText);
             throw new Error('Failed to fetch configuration');
         }
-        return response.json();
+        const data = await response.json();
+        console.log('Données API :', data); // Ajoutez ce log
+        return data;
     }
 
     // Charger la configuration dynamiquement
