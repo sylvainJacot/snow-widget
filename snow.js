@@ -6,17 +6,20 @@ window.snowStorm = (function (window, document) {
         excludeMobile: true,
         flakesMax: 200,
         useGPU: true,
-        snowColor: '#fff',
+        snowColors: ['#fff', '#ececf2', '#7792a7', '#e7eaef', '#bfcbd3'],
         snowStick: true,
-        useMeltEffect: false,
-        // useTwinkleEffect: false, // À implémenter plus tard
-        // followMouse: false, // À implémenter plus tard
-        // freezeOnBlur: false, // À implémenter plus tard
-        flakeSize: 3,
-        vMaxX: 2,
-        vMaxY: 2,
+        useMeltEffect: true,
+        useTwinkleEffect: false,
+        followMouse: false,
+        flakeSize: 2,
+        vMaxX: 1.5,
+        vMaxY: 1.5,
         zIndex: 9999,
-        checkForHitEveryPixel: 2
+        checkForHitEveryPixel: 2,
+        snowShape: 'circle', // Options : 'circle', 'emoji', 'character'
+        emoji: '❄️',        // Emoji par défaut si snowShape est 'emoji'
+        character: '❄️',     // Caractère par défaut si snowShape est 'character',
+        sizeJitter: 1
     };
 
     // Variable pour stocker la configuration dynamique
@@ -65,7 +68,7 @@ window.snowStorm = (function (window, document) {
     async function loadConfig() {
         const params = getUrlParams();
         let userConfig;
-    
+
         if (params.preview === 'true' && params.config) {
             // Mode preview : configuration encodée dans l’URL
             userConfig = JSON.parse(decodeURIComponent(params.config));
@@ -81,7 +84,7 @@ window.snowStorm = (function (window, document) {
             console.error('Aucun token ou configuration preview fourni');
             return defaultConfig;
         }
-    
+
         // Fusionner avec la configuration par défaut
         return { ...defaultConfig, ...userConfig };
     }
@@ -145,7 +148,6 @@ window.snowStorm = (function (window, document) {
             y: startY,
             vX: (Math.random() - 0.5) * config.vMaxX,
             vY: Math.random() * config.vMaxY,
-            rayon: Math.random() * config.flakeSize,
             active: true,
             accumule: false,
             meltFrame: 0,
@@ -153,7 +155,9 @@ window.snowStorm = (function (window, document) {
             h1Cible: h1Index,
             offsetX: 0,
             offsetY: 0,
-            lastY: startY
+            lastY: startY,
+            color: config.snowColors[Math.floor(Math.random() * config.snowColors.length)],
+            rayon: config.flakeSize * (1 + (Math.random() - 0.5) * config.sizeJitter),
         };
     }
 
@@ -188,20 +192,49 @@ window.snowStorm = (function (window, document) {
         const viewBottom = viewTop + window.innerHeight;
 
         flocons.forEach(flocon => {
+            // Mise à jour de la position des flocons
             if (flocon.active && !flocon.accumule) {
                 flocon.lastY = flocon.y;
                 flocon.x += flocon.vX * windOffset;
                 flocon.y += flocon.vY;
 
-                if (config.snowStick && (Math.floor(flocon.y) % config.checkForHitEveryPixel === 0)) {
+                // Vérifier la collision à intervalles réguliers
+                if (config.snowStick && Math.abs(flocon.y - flocon.lastY) >= config.checkForHitEveryPixel) {
                     verifierCollision(flocon);
+                    flocon.lastY = flocon.y;
                 }
 
+                // Recycler si le flocon sort des limites
                 if (flocon.y > documentHeight || flocon.x < -50 || flocon.x > canvas.width + 50) {
                     recycleFlocon(flocon);
                 }
             }
 
+            // Effet de scintillement (placé avant le dessin pour fonctionner)
+            if (config.useTwinkleEffect && flocon.active && !flocon.accumule) {
+                ctx.globalAlpha = 0.5 + 0.5 * Math.sin(flocon.twinkleFrame * Math.PI / 10);
+                flocon.twinkleFrame = (flocon.twinkleFrame + 1) % 20;
+            } else {
+                ctx.globalAlpha = 1;
+            }
+
+            // Dessin des flocons selon leur forme
+            if (flocon.active && !flocon.accumule &&
+                flocon.y >= viewTop - 100 && flocon.y <= viewBottom + 100) {
+                if (config.snowShape === 'circle') {
+                    ctx.beginPath();
+                    ctx.arc(flocon.x, flocon.y - viewTop, flocon.rayon, 0, Math.PI * 2);
+                    ctx.fillStyle = flocon.color;
+                    ctx.fill();
+                } else if (config.snowShape === 'emoji' || config.snowShape === 'character') {
+                    const symbol = config.snowShape === 'emoji' ? config.emoji : config.character;
+                    ctx.font = `${flocon.rayon * 2}px Arial`;
+                    ctx.fillStyle = flocon.color;
+                    ctx.fillText(symbol, flocon.x - flocon.rayon, flocon.y - viewTop);
+                }
+            }
+
+            // Effet de fonte
             if (config.useMeltEffect && flocon.active && Math.random() > 0.998) {
                 flocon.meltFrame = 1;
             }
@@ -217,15 +250,14 @@ window.snowStorm = (function (window, document) {
                 }
             }
 
-            if (flocon.active && !flocon.accumule &&
-                flocon.y >= viewTop - 100 && flocon.y <= viewBottom + 100) {
-                ctx.beginPath();
-                ctx.arc(flocon.x, flocon.y - viewTop, flocon.rayon, 0, Math.PI * 2);
-                ctx.fillStyle = config.snowColor;
-                ctx.fill();
+            if (config.snowStick && Math.abs(flocon.y - flocon.lastY) >= config.checkForHitEveryPixel) {
+                verifierCollision(flocon);
+                flocon.lastY = flocon.y;
             }
+
         });
 
+        // Dessin des flocons accumulés
         accumulatedSnow.forEach(flocon => {
             if (flocon.h1Cible >= h1Elements.length) return;
             const h1 = h1Elements[flocon.h1Cible];
@@ -234,13 +266,21 @@ window.snowStorm = (function (window, document) {
             const snowY = rect.top + flocon.offsetY;
 
             if (snowY >= -flocon.rayon * 2 && snowY <= canvas.height + flocon.rayon * 2) {
-                ctx.beginPath();
-                ctx.arc(snowX, snowY, flocon.rayon, 0, Math.PI * 2);
-                ctx.fillStyle = config.snowColor;
-                ctx.fill();
+                if (config.snowShape === 'circle') {
+                    ctx.beginPath();
+                    ctx.arc(snowX, snowY, flocon.rayon, 0, Math.PI * 2);
+                    ctx.fillStyle = flocon.color;
+                    ctx.fill();
+                } else if (config.snowShape === 'emoji' || config.snowShape === 'character') {
+                    const symbol = config.snowShape === 'emoji' ? config.emoji : config.character;
+                    ctx.font = `${flocon.rayon * 2}px Arial`;
+                    ctx.fillStyle = flocon.color;
+                    ctx.fillText(symbol, snowX - flocon.rayon, snowY);
+                }
             }
         });
 
+        // Ajout de nouveaux flocons
         const activeCount = flocons.filter(f => f.active && !f.accumule).length;
         if (activeCount < config.flakesMax) {
             const newFlakesToAdd = Math.min(
@@ -277,12 +317,13 @@ window.snowStorm = (function (window, document) {
         flocon.y = newPos.y;
         flocon.vX = (Math.random() - 0.5) * config.vMaxX;
         flocon.vY = Math.random() * config.vMaxY + 1;
-        flocon.rayon = Math.random() * config.flakeSize;
+        flocon.rayon = config.flakeSize * (1 + (Math.random() - 0.5) * config.sizeJitter);
         flocon.active = true;
         flocon.meltFrame = 0;
         flocon.twinkleFrame = 0;
         flocon.h1Cible = newPos.h1Index;
         flocon.lastY = newPos.y;
+        flocon.color = config.snowColors[Math.floor(Math.random() * config.snowColors.length)];
     }
 
     function positionnementStrategique() {
@@ -329,10 +370,15 @@ window.snowStorm = (function (window, document) {
     }
 
     function handleMouseMove(e) {
-        if (!config.followMouse) return;
-        const x = e.clientX;
-        const mid = canvas.width / 2;
-        windOffset = x < mid ? -1 + (x / mid) : (x - mid) / mid;
+        if (config.followMouse) {
+            flocons.forEach(flocon => {
+                if (flocon.active && !flocon.accumule) {
+                    const dx = e.clientX - flocon.x;
+                    flocon.vX += dx * 0.01; // Attraction vers la souris
+                    flocon.vX = Math.max(-config.vMaxX, Math.min(config.vMaxX, flocon.vX));
+                }
+            });
+        }
     }
 
     function start() {
