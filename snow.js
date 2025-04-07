@@ -12,8 +12,7 @@ window.snowStorm = (function (window, document) {
         // useTwinkleEffect: false, // À implémenter plus tard
         // followMouse: false, // À implémenter plus tard
         // freezeOnBlur: false, // À implémenter plus tard
-        flakeWidth: 3,
-        flakeHeight: 3,
+        flakeSize: 3,
         vMaxX: 2,
         vMaxY: 2,
         zIndex: 9999,
@@ -125,7 +124,7 @@ window.snowStorm = (function (window, document) {
     function createFlocon() {
         const h1Index = Math.floor(Math.random() * h1Elements.length);
         let startX = Math.random() * canvas.width;
-        let startY = -config.flakeHeight;
+        let startY = -config.flakeSize;
 
         if (Math.random() < 0.3 && h1Elements.length > 0) {
             const targetH1 = h1Elements[h1Index];
@@ -136,7 +135,7 @@ window.snowStorm = (function (window, document) {
                 startX = rect.left + Math.random() * rect.width;
                 startY = absoluteTop - Math.random() * 200 - 50;
                 if (startY < window.scrollY + window.innerHeight) {
-                    startY = window.scrollY - config.flakeHeight;
+                    startY = window.scrollY - config.flakeSize;
                 }
             }
         }
@@ -146,7 +145,7 @@ window.snowStorm = (function (window, document) {
             y: startY,
             vX: (Math.random() - 0.5) * config.vMaxX,
             vY: Math.random() * config.vMaxY,
-            rayon: Math.random() * config.flakeWidth,
+            rayon: Math.random() * config.flakeSize,
             active: true,
             accumule: false,
             meltFrame: 0,
@@ -278,7 +277,7 @@ window.snowStorm = (function (window, document) {
         flocon.y = newPos.y;
         flocon.vX = (Math.random() - 0.5) * config.vMaxX;
         flocon.vY = Math.random() * config.vMaxY + 1;
-        flocon.rayon = Math.random() * config.flakeWidth;
+        flocon.rayon = Math.random() * config.flakeSize;
         flocon.active = true;
         flocon.meltFrame = 0;
         flocon.twinkleFrame = 0;
@@ -291,7 +290,7 @@ window.snowStorm = (function (window, document) {
         if (chance < 0.7 || h1Elements.length === 0) {
             return {
                 x: Math.random() * canvas.width,
-                y: -config.flakeHeight,
+                y: -config.flakeSize,
                 h1Index: Math.floor(Math.random() * Math.max(1, h1Elements.length))
             };
         } else {
@@ -302,7 +301,7 @@ window.snowStorm = (function (window, document) {
 
             return {
                 x: rect.left + Math.random() * rect.width,
-                y: Math.max(-config.flakeHeight, absoluteTop - Math.random() * 200 - 50),
+                y: Math.max(-config.flakeSize, absoluteTop - Math.random() * 200 - 50),
                 h1Index: h1Index
             };
         }
