@@ -55,12 +55,18 @@ window.snowStorm = (function (window, document) {
                 }
             }
         );
+    
         if (!response.ok) {
+            if (response.status === 403) {
+                console.error('Abonnement inactif ou expiré. Veuillez renouveler votre abonnement.');
+                return null; // Retourne null pour indiquer une erreur spécifique
+            }
             console.error('Réponse API non valide :', response.status, response.statusText);
             throw new Error('Failed to fetch configuration');
         }
+    
         const data = await response.json();
-        console.log('Données API :', data); // Ajoutez ce log
+        console.log('Données API :', data);
         return data;
     }
 
@@ -68,7 +74,7 @@ window.snowStorm = (function (window, document) {
     async function loadConfig() {
         const params = getUrlParams();
         let userConfig;
-
+    
         if (params.preview === 'true' && params.config) {
             // Mode preview : configuration encodée dans l’URL
             userConfig = JSON.parse(decodeURIComponent(params.config));
@@ -76,6 +82,10 @@ window.snowStorm = (function (window, document) {
             // Mode live : récupération depuis Supabase
             try {
                 userConfig = await fetchConfig(params.token);
+                if (!userConfig) {
+                    console.error('Impossible de charger la configuration : abonnement invalide.');
+                    return defaultConfig; // Utilise la config par défaut
+                }
             } catch (error) {
                 console.error('Erreur lors de la récupération de la configuration :', error);
                 return defaultConfig;
@@ -84,7 +94,7 @@ window.snowStorm = (function (window, document) {
             console.error('Aucun token ou configuration preview fourni');
             return defaultConfig;
         }
-
+    
         // Fusionner avec la configuration par défaut
         return { ...defaultConfig, ...userConfig };
     }
