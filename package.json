@@ -1,0 +1,16 @@
+{
+  "name": "snow-widget",
+  "version": "1.0.0",
+  "main": "snow-min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "esbuild snow.js --bundle --minify --outfile=snow-min.js --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "esbuild": "^0.25.2"
+  }
+}
