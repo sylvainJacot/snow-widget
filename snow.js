@@ -125,7 +125,6 @@ window.snowStorm = (function (window, document) {
                 newFlake.y = Math.random() * documentHeight;
             }
             flocons.push(newFlake);
-            if (i >= config.maxFlakes) newFlake.active = false;
         }
     }
 
