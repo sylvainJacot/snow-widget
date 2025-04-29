@@ -149,6 +149,7 @@ window.snowStorm = (function (window, document) {
 
     function start() {
         if (config.disableOnMobile && isMobile) return;
+        if (animationFrameId) return; // Ne pas relancer si une animation est déjà active
         createCanvas(config);
         updateH1Elements();
         initFlocons();
@@ -169,15 +170,22 @@ window.snowStorm = (function (window, document) {
     function stop() {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
+
+        // Supprimer les écouteurs d'événements
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('scroll', updateH1Elements);
+        if (config.mouseInteraction) {
+            window.removeEventListener('mousemove', handleMouseMove);
+        }
     }
 
-// Nouvelle fonction pour mettre à jour la configuration dynamiquement
-function updateConfig(newConfig) {
-    config = { ...config, ...newConfig }; // Fusionner avec les nouveaux paramètres
-    initFlocons(); // Réinitialiser les flocons avec la nouvelle configuration
-    stop(); // Arrêter l’animation
-    start(); // Redémarrer avec la nouvelle config
-}
+    // Nouvelle fonction pour mettre à jour la configuration dynamiquement
+    function updateConfig(newConfig) {
+        config = { ...config, ...newConfig }; // Fusionner avec les nouveaux paramètres
+        initFlocons(); // Réinitialiser les flocons avec la nouvelle configuration
+        stop(); // Arrêter l’animation
+        start(); // Redémarrer avec la nouvelle config
+    }
 
     return {
         start,
