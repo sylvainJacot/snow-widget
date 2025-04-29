@@ -171,20 +171,13 @@ window.snowStorm = (function (window, document) {
         animationFrameId = null;
     }
 
-    // Nouvelle fonction pour mettre à jour la configuration dynamiquement
-    function updateConfig(newConfig) {
-        const oldFlakesMax = config.maxFlakes;
-        config = { ...config, ...newConfig }; // Fusionner avec les nouveaux paramètres
-
-        // Si maxFlakes a changé, réinitialiser les flocons
-        if (config.maxFlakes !== oldFlakesMax) {
-            initFlocons();
-        }
-
-        // Redémarrer l'animation avec la nouvelle configuration
-        stop();
-        start();
-    }
+// Nouvelle fonction pour mettre à jour la configuration dynamiquement
+function updateConfig(newConfig) {
+    config = { ...config, ...newConfig }; // Fusionner avec les nouveaux paramètres
+    initFlocons(); // Réinitialiser les flocons avec la nouvelle configuration
+    stop(); // Arrêter l’animation
+    start(); // Redémarrer avec la nouvelle config
+}
 
     return {
         start,

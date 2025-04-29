@@ -4,7 +4,7 @@
   "main": "snow-min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "esbuild snow.js --bundle --minify --outfile=snow-min.js --watch"
+    "start": "node obfuscate.js"
   },
   "keywords": [],
   "author": "",
