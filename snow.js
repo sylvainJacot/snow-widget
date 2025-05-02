@@ -12,7 +12,7 @@ window.snowStorm = (function (window, document) {
         opacity: 1,
         maxFlakes: 200, // Nombre maximum de flocons simultanés
         flakeColors: ['#fff', '#ececf2', '#7792a7', '#e7eaef', '#bfcbd3'],
-        flakeShape: 'circle', // Options : 'circle', 'emojiCharacter', 'character'
+        flakeShape: 'default', // Options : 'default', 'custom'
         emojiCharacter: '❄️',        // Emoji par défaut si flakeShape est 'emojiCharacter'
         flakeSize: 2,
         sizeVariation: 1,
@@ -26,15 +26,13 @@ window.snowStorm = (function (window, document) {
         // ✨ Effets spéciaux
         stickyEffect: true,
         meltEffects: true,
-        twinkleEffect: false,
 
         // 📱 Compatibilité & Contrôle
         startDate: null, // Format : 'YYYY-MM-DDTHH:MM:SS'
         endDate: null,   // Format : 'YYYY-MM-DDTHH:MM:SS'
         disableOnMobile: true,
         useGPU: true,
-        zIndex: 9999,
-        pixelCheckInterval: 2,
+        zIndex: 9999
     };
 
     // Variable pour stocker la configuration dynamique
@@ -47,11 +45,30 @@ window.snowStorm = (function (window, document) {
     let accumulatedSnow = [];
     let documentHeight = 0;
 
+    function checkShouldStart(configParam) {
+        const withinLifetime = isWithinLifetime(configParam);
+        const shouldAutoStart = configParam.autoStart === true;
+        const notDisabledOnMobile = !configParam.disableOnMobile || !isMobile;
+
+        return withinLifetime && shouldAutoStart && notDisabledOnMobile;
+    }
+
 
     // Initialisation asynchrone de la configuration
     (async function () {
         config = await loadConfig(defaultConfig);
-        if (isWithinLifetime(config) && config.autoStart && (!config.disableOnMobile || !isMobile)) {
+        console.group('%c loadConfig', 'color: white; background-color:rgb(164, 27, 27); font-size: 15px');
+        console.log({
+            IS_WITHIN_LIFETIME: isWithinLifetime(config),
+            AUTO_START: config.autoStart,
+            DISABLE_ON_MOBILE: config.disableOnMobile,
+            IS_MOBILE: isMobile,
+            SHOULD_START: checkShouldStart(config),
+        });
+        console.groupEnd();
+
+        if (checkShouldStart(config)) {
+
             start();
         }
     })();
@@ -178,18 +195,31 @@ window.snowStorm = (function (window, document) {
         }
     }
 
+    function restart() {
+        stop();  // Arrête l’animation
+        start(); // Redémarre l’animation
+    }
+
     // Nouvelle fonction pour mettre à jour la configuration dynamiquement
     function updateConfig(newConfig) {
-        config = { ...config, ...newConfig }; // Fusionner avec les nouveaux paramètres
-        initFlocons(); // Réinitialiser les flocons avec la nouvelle configuration
-        stop(); // Arrêter l’animation
-        start(); // Redémarrer avec la nouvelle config
+        // Fusionner avec les nouveaux paramètres
+        config = { ...config, ...newConfig };
+
+        // Arrêter l'animation dans tous les cas
+        stop();
+
+        // Redémarrer uniquement si les conditions sont remplies
+        if (checkShouldStart(config)) {
+            console.log('Restart animation...');
+            restart();
+        }
     }
 
     return {
         start,
         stop,
-        updateConfig, // Exposer la fonction updateConfig
+        restart,
+        updateConfig,
         get config() { return config; }
     };
 })(window, document);

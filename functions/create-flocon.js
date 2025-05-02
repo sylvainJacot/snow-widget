@@ -3,17 +3,14 @@ export function createFlocon(h1Elements, config, canvas) {
     let startX = Math.random() * canvas.width;
     let startY = -config.flakeSize;
 
-    if (Math.random() < 0.3 && h1Elements.length > 0) {
+    if (h1Elements.length > 0 && Math.random() < 0.3) {
         const targetH1 = h1Elements[h1Index];
         const rect = targetH1.getBoundingClientRect();
         const absoluteTop = rect.top + window.scrollY;
 
         if (absoluteTop > window.scrollY + window.innerHeight) {
             startX = rect.left + Math.random() * rect.width;
-            startY = absoluteTop - Math.random() * 200 - 50;
-            if (startY < window.scrollY + window.innerHeight) {
-                startY = window.scrollY - config.flakeSize;
-            }
+            startY = Math.max(window.scrollY - config.flakeSize, absoluteTop - Math.random() * 200 - 50);
         }
     }
 
@@ -36,22 +33,24 @@ export function createFlocon(h1Elements, config, canvas) {
 }
 
 export function recycleFlocon(config, flocon, positionnementStrategique, accumulatedSnow) {
-        if (flocon.accumule) {
-            const index = accumulatedSnow.indexOf(flocon);
-            if (index !== -1) accumulatedSnow.splice(index, 1);
-            flocon.accumule = false;
-        }
-
-        const newPos = positionnementStrategique();
-        flocon.x = newPos.x;
-        flocon.y = newPos.y;
-        flocon.vX = (Math.random() - 0.5) * config.maxHorizontalSpeed;
-        flocon.vY = Math.random() * config.maxVerticalSpeed + 1;
-        flocon.rayon = config.flakeSize * (1 + (Math.random() - 0.5) * config.sizeVariation);
-        flocon.active = true;
-        flocon.meltFrame = 0;
-        flocon.twinkleFrame = 0;
-        flocon.h1Cible = newPos.h1Index;
-        flocon.lastY = newPos.y;
-        flocon.color = config.flakeColors[Math.floor(Math.random() * config.flakeColors.length)];
+    if (flocon.accumule) {
+        const index = accumulatedSnow.indexOf(flocon);
+        if (index !== -1) accumulatedSnow.splice(index, 1);
+        flocon.accumule = false;
     }
+
+    const newPos = positionnementStrategique();
+    Object.assign(flocon, {
+        x: newPos.x,
+        y: newPos.y,
+        vX: (Math.random() - 0.5) * config.maxHorizontalSpeed,
+        vY: Math.random() * config.maxVerticalSpeed + 1,
+        rayon: config.flakeSize * (1 + (Math.random() - 0.5) * config.sizeVariation),
+        active: true,
+        meltFrame: 0,
+        twinkleFrame: 0,
+        h1Cible: newPos.h1Index,
+        lastY: newPos.y,
+        color: config.flakeColors[Math.floor(Math.random() * config.flakeColors.length)]
+    });
+}

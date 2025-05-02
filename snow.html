@@ -5,6 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neige Modernisée avec Accumulation Réaliste</title>
     <link rel="stylesheet" href="dist/snow.min.css">
+    <style>
+        .config-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .config-panel h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input[type="range"] {
+            width: 100%;
+        }
+        .form-group input[type="color"] {
+            width: 40px;
+            padding: 0;
+            border: none;
+            margin-right: 5px;
+        }
+        .color-inputs {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .form-group select,
+        .form-group input[type="text"],
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group input[type="datetime-local"] {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group .value-display {
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
     <h2>Bienvenue sur mon site</h2>
@@ -15,7 +72,182 @@
     <h1>Encore un titre</h1> 
     <h1>Encore un titre</h1>    
 
+    <div class="config-panel">
+        <h3>Configuration de la neige</h3>
+        <form id="snowConfig">
+            <div class="form-group">
+                <label for="maxFlakes">Nombre de flocons</label>
+                <input type="range" id="maxFlakes" min="50" max="500" value="200">
+                <span class="value-display" id="maxFlakesValue">200</span>
+            </div>
+            <div class="form-group">
+                <label for="opacity">Opacité</label>
+                <input type="range" id="opacity" min="0.1" max="1" step="0.1" value="1">
+                <span class="value-display" id="opacityValue">1</span>
+            </div>
+            <div class="form-group">
+                <label for="flakeSize">Taille des flocons</label>
+                <input type="range" id="flakeSize" min="1" max="5" step="0.5" value="2">
+                <span class="value-display" id="flakeSizeValue">2</span>
+            </div>
+            <div class="form-group">
+                <label for="maxHorizontalSpeed">Vitesse horizontale maximale</label>
+                <input type="range" id="maxHorizontalSpeed" min="0.5" max="5" step="0.1" value="1.5">
+                <span class="value-display" id="maxHorizontalSpeedValue">1.5</span>
+            </div>
+            <div class="form-group">
+                <label for="maxVerticalSpeed">Vitesse verticale maximale</label>
+                <input type="range" id="maxVerticalSpeed" min="0.5" max="5" step="0.1" value="1.5">
+                <span class="value-display" id="maxVerticalSpeedValue">1.5</span>
+            </div>
+            <div class="form-group">
+                <label for="sizeVariation">Variation de taille</label>
+                <input type="range" id="sizeVariation" min="0" max="2" step="0.1" value="1">
+                <span class="value-display" id="sizeVariationValue">1</span>
+            </div>
+            <div class="form-group">
+                <label for="flakeShape">Forme des flocons</label>
+                <select id="flakeShape">
+                    <option value="default">Par défaut</option>
+                    <option value="custom">Personnalisé</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="emojiCharacter">Caractère personnalisé</label>
+                <input type="text" id="emojiCharacter" value="❄️">
+            </div>
+            <div class="form-group">
+                <label for="flakeColors">Couleurs des flocons</label>
+                <div id="flakeColors" class="color-inputs">
+                    <input type="color" value="#ffffff" class="flakeColor">
+                    <input type="color" value="#ececf2" class="flakeColor">
+                    <input type="color" value="#7792a7" class="flakeColor">
+                    <input type="color" value="#e7eaef" class="flakeColor">
+                    <input type="color" value="#bfcbd3" class="flakeColor">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="mouseInteraction"> 
+                    Interaction souris
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="stickyEffect"> 
+                    Effet collant
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="meltEffects" checked> 
+                    Effet de fonte
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="disableOnMobile"> 
+                    Désactiver sur mobile
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="useGPU"> 
+                    Utiliser le GPU
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="autoStart" checked> 
+                    Auto-start
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="zIndex">Z-Index</label>
+                <input type="number" id="zIndex" value="9999" min="0">
+            </div>
+            <div class="form-group">
+                <label for="pixelCheckInterval">Intervalle de vérification des pixels</label>
+                <input type="number" id="pixelCheckInterval" value="2" min="1">
+            </div>
+            <div class="form-group">
+                <label for="startDate">Date de début</label>
+                <input type="datetime-local" id="startDate">
+            </div>
+            <div class="form-group">
+                <label for="endDate">Date de fin</label>
+                <input type="datetime-local" id="endDate">
+            </div>
+        </form>
+    </div>
+
     <!-- <script src="https://cdn.jsdelivr.net/gh/sylvainJacot/snow-widget@0.0.15/snow-min.js?token=c5d45ac8-8018-4fa0-ac4a-eca36a9fa511" async></script> -->
     <script src="./snow-min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('snowConfig');
+            const valueDisplays = {};
+            
+            // Initialize value displays
+            ['maxFlakes', 'opacity', 'flakeSize', 'maxHorizontalSpeed', 'maxVerticalSpeed', 'sizeVariation'].forEach(id => {
+                const input = document.getElementById(id);
+                const display = document.getElementById(id + 'Value');
+                valueDisplays[id] = display;
+                display.textContent = input.value;
+            });
+
+            function updateSnowConfig() {
+                // Récupérer les couleurs
+                const flakeColors = Array.from(document.querySelectorAll('.flakeColor')).map(input => input.value);
+
+                // Récupérer les dates et les convertir en format ISO si elles sont définies
+                const startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value).toISOString() : null;
+                const endDate = document.getElementById('endDate').value ? new Date(document.getElementById('endDate').value).toISOString() : null;
+
+                console.log('Mise à jour de la configuration neige...');
+    const autoStart = document.getElementById('autoStart').checked;
+    console.log('autoStart value:', autoStart);
+
+                const config = {
+                    maxFlakes: parseInt(document.getElementById('maxFlakes').value),
+                    opacity: parseFloat(document.getElementById('opacity').value),
+                    flakeSize: parseFloat(document.getElementById('flakeSize').value),
+                    sizeVariation: parseFloat(document.getElementById('sizeVariation').value),
+                    maxHorizontalSpeed: parseFloat(document.getElementById('maxHorizontalSpeed').value),
+                    maxVerticalSpeed: parseFloat(document.getElementById('maxVerticalSpeed').value),
+                    flakeShape: document.getElementById('flakeShape').value,
+                    emojiCharacter: document.getElementById('emojiCharacter').value,
+                    flakeColors: flakeColors,
+                    mouseInteraction: document.getElementById('mouseInteraction').checked,
+                    stickyEffect: document.getElementById('stickyEffect').checked,
+                    meltEffects: document.getElementById('meltEffects').checked,
+                    disableOnMobile: document.getElementById('disableOnMobile').checked,
+                    useGPU: document.getElementById('useGPU').checked,
+                    autoStart: autoStart,
+                    zIndex: parseInt(document.getElementById('zIndex').value),
+                    pixelCheckInterval: parseInt(document.getElementById('pixelCheckInterval').value),
+                    startDate: startDate,
+                    endDate: endDate
+                };
+
+                window.snowStorm.updateConfig(config);
+            }
+
+            // Add event listeners for all form inputs
+            form.querySelectorAll('input, select').forEach(input => {
+                const eventType = input.type === 'checkbox' ? 'change' : 'input';
+                input.addEventListener(eventType, (e) => {
+                    // Update value display for range inputs
+                    if (e.target.type === 'range') {
+                        valueDisplays[e.target.id].textContent = e.target.value;
+                    }
+                    updateSnowConfig();
+                });
+            });
+
+            // Initial configuration
+            updateSnowConfig();
+        });
+    </script>
 </body>
 </html>
