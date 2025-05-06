@@ -33,9 +33,10 @@ export function animer(flocons, accumulatedSnow, config, verifierCollision, recy
             if (flocon.y > documentHeight || flocon.x < -50 || flocon.x > canvas.width + 50) {
                 recycleFlocon(config, flocon, positionnementStrategique, accumulatedSnow);
             } else {
-                if (config.stickyEffect && Math.abs(flocon.y - flocon.lastY) >= 2) {
+                // Désactivation du stickyEffect
+                /*if (config.stickyEffect && Math.abs(flocon.y - flocon.lastY) >= 2) {
                     verifierCollision(flocon);
-                }
+                }*/
 
                 if (flocon.y >= visibleRange.top && flocon.y <= visibleRange.bottom) {
                     movingFlakes.push(flocon);

@@ -24,7 +24,7 @@ window.snowStorm = (function (window, document) {
         mouseInteraction: false,
 
         // ✨ Effets spéciaux
-        stickyEffect: true,
+        stickyEffect: false,
         meltEffects: true,
 
         // 📱 Compatibilité & Contrôle
@@ -84,29 +84,9 @@ window.snowStorm = (function (window, document) {
     }
 
 
+    // Fonction désactivée - stickyEffect
     function verifierCollision(flocon) {
-        for (let i = 0; i < h1Elements.length; i++) {
-            const h1 = h1Elements[i];
-            const rect = h1.getBoundingClientRect();
-            const absoluteRect = {
-                left: rect.left,
-                right: rect.right,
-                top: rect.top + window.scrollY,
-                bottom: rect.bottom + window.scrollY
-            };
-
-            if (flocon.x >= absoluteRect.left && flocon.x <= absoluteRect.right) {
-                if (flocon.y >= absoluteRect.top && flocon.lastY < absoluteRect.top) {
-                    flocon.h1Cible = i;
-                    flocon.accumule = true;
-                    flocon.offsetX = flocon.x - rect.left;
-                    flocon.offsetY = 0;
-                    accumulatedSnow.push(flocon);
-                    return true;
-                }
-            }
-        }
-        return false;
+        return false; // Désactivé
     }
 
     function positionnementStrategique() {

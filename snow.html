@@ -132,52 +132,52 @@
                     Interaction souris
                 </label>
             </div>
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label>
                     <input type="checkbox" id="stickyEffect"> 
                     Effet collant
                 </label>
-            </div>
+            </div> -->
             <div class="form-group">
                 <label>
                     <input type="checkbox" id="meltEffects" checked> 
                     Effet de fonte
                 </label>
             </div>
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label>
                     <input type="checkbox" id="disableOnMobile"> 
                     Désactiver sur mobile
                 </label>
-            </div>
-            <div class="form-group">
+            </div> -->
+            <!-- <div class="form-group">
                 <label>
                     <input type="checkbox" id="useGPU"> 
                     Utiliser le GPU
                 </label>
-            </div>
-            <div class="form-group">
+            </div> -->
+            <!-- <div class="form-group">
                 <label>
                     <input type="checkbox" id="autoStart" checked> 
                     Auto-start
                 </label>
-            </div>
+            </div> -->
             <div class="form-group">
                 <label for="zIndex">Z-Index</label>
                 <input type="number" id="zIndex" value="9999" min="0">
             </div>
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label for="pixelCheckInterval">Intervalle de vérification des pixels</label>
                 <input type="number" id="pixelCheckInterval" value="2" min="1">
-            </div>
-            <div class="form-group">
+            </div> -->
+            <!-- <div class="form-group">
                 <label for="startDate">Date de début</label>
                 <input type="datetime-local" id="startDate">
             </div>
             <div class="form-group">
                 <label for="endDate">Date de fin</label>
                 <input type="datetime-local" id="endDate">
-            </div>
+            </div> -->
         </form>
     </div>
 
@@ -201,12 +201,10 @@
                 const flakeColors = Array.from(document.querySelectorAll('.flakeColor')).map(input => input.value);
 
                 // Récupérer les dates et les convertir en format ISO si elles sont définies
-                const startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value).toISOString() : null;
-                const endDate = document.getElementById('endDate').value ? new Date(document.getElementById('endDate').value).toISOString() : null;
+                // const startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value).toISOString() : null;
+                // const endDate = document.getElementById('endDate').value ? new Date(document.getElementById('endDate').value).toISOString() : null;
 
-                console.log('Mise à jour de la configuration neige...');
-    const autoStart = document.getElementById('autoStart').checked;
-    console.log('autoStart value:', autoStart);
+    // const autoStart = document.getElementById('autoStart').checked;
 
                 const config = {
                     maxFlakes: parseInt(document.getElementById('maxFlakes').value),
@@ -219,15 +217,15 @@
                     emojiCharacter: document.getElementById('emojiCharacter').value,
                     flakeColors: flakeColors,
                     mouseInteraction: document.getElementById('mouseInteraction').checked,
-                    stickyEffect: document.getElementById('stickyEffect').checked,
+                    // stickyEffect: document.getElementById('stickyEffect').checked,
                     meltEffects: document.getElementById('meltEffects').checked,
-                    disableOnMobile: document.getElementById('disableOnMobile').checked,
-                    useGPU: document.getElementById('useGPU').checked,
-                    autoStart: autoStart,
+                    // disableOnMobile: document.getElementById('disableOnMobile').checked,
+                    // useGPU: document.getElementById('useGPU').checked,
+                    // autoStart: autoStart,
                     zIndex: parseInt(document.getElementById('zIndex').value),
-                    pixelCheckInterval: parseInt(document.getElementById('pixelCheckInterval').value),
-                    startDate: startDate,
-                    endDate: endDate
+                    // pixelCheckInterval: parseInt(document.getElementById('pixelCheckInterval').value),
+                    // startDate: startDate,
+                    // endDate: endDate
                 };
 
                 window.snowStorm.updateConfig(config);
