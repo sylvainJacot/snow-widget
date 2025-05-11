@@ -196,7 +196,7 @@ window.snowStorm = (function (window, document) {
         // Redémarrer uniquement si les conditions sont remplies
         if (checkShouldStart(config)) {
             console.log('Restart animation...');
-            restart();
+            start();
         }
     }
 
