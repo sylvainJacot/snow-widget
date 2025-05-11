@@ -7,37 +7,27 @@ import { isWithinLifetime } from './functions/lifetime';
 window.snowStorm = (function (window, document) {
     // Configuration par défaut
     const defaultConfig = {
-
-        // ❄️ Flocons & Apparence
         opacity: 1,
-        maxFlakes: 200, // Nombre maximum de flocons simultanés
+        maxFlakes: 200,
         flakeColors: ['#fff', '#ececf2', '#7792a7', '#e7eaef', '#bfcbd3'],
-        flakeShape: 'default', // Options : 'default', 'custom'
-        emojiCharacter: '❄️',        // Emoji par défaut si flakeShape est 'emojiCharacter'
+        flakeShape: 'default',
+        emojiCharacter: '❄️',
         flakeSize: 2,
         sizeVariation: 1,
-
-        // 🌬️ Mouvement & Comportement
-        autoStart: true,   // Lance automatiquement l’effet à l'arrivée sur la page
+        autoStart: true,
         maxHorizontalSpeed: 1.5,
         maxVerticalSpeed: 1.5,
         mouseInteraction: false,
-
-        // ✨ Effets spéciaux
         stickyEffect: false,
         meltEffects: true,
-
-        // 📱 Compatibilité & Contrôle
-        startDate: null, // Format : 'YYYY-MM-DDTHH:MM:SS'
-        endDate: null,   // Format : 'YYYY-MM-DDTHH:MM:SS'
+        startDate: null,
+        endDate: null,
         disableOnMobile: true,
         useGPU: true,
         zIndex: 9999
     };
 
-    // Variable pour stocker la configuration dynamique
     let config = { ...defaultConfig };
-
     let flocons = [], animationFrameId;
     let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     let windOffset = 1;
@@ -49,12 +39,9 @@ window.snowStorm = (function (window, document) {
         const withinLifetime = isWithinLifetime(configParam);
         const shouldAutoStart = configParam.autoStart === true;
         const notDisabledOnMobile = !configParam.disableOnMobile || !isMobile;
-
         return withinLifetime && shouldAutoStart && notDisabledOnMobile;
     }
 
-
-    // Initialisation asynchrone de la configuration
     (async function () {
         config = await loadConfig(defaultConfig);
         console.group('%c loadConfig', 'color: white; background-color:rgb(164, 27, 27); font-size: 15px');
@@ -68,7 +55,6 @@ window.snowStorm = (function (window, document) {
         console.groupEnd();
 
         if (checkShouldStart(config)) {
-
             start();
         }
     })();
@@ -83,8 +69,6 @@ window.snowStorm = (function (window, document) {
         );
     }
 
-
-    // Fonction désactivée - stickyEffect
     function verifierCollision(flocon) {
         return false; // Désactivé
     }
@@ -102,7 +86,6 @@ window.snowStorm = (function (window, document) {
             const h1 = h1Elements[h1Index];
             const rect = h1.getBoundingClientRect();
             const absoluteTop = rect.top + window.scrollY;
-
             return {
                 x: rect.left + Math.random() * rect.width,
                 y: Math.max(-config.flakeSize, absoluteTop - Math.random() * 200 - 50),
@@ -115,13 +98,33 @@ window.snowStorm = (function (window, document) {
         updateH1Elements();
         flocons = [];
         accumulatedSnow = [];
-
         for (let i = 0; i < config.maxFlakes; i++) {
             const newFlake = createFlocon(h1Elements, config, canvas);
             if (i < config.maxFlakes / 3) {
                 newFlake.y = Math.random() * documentHeight;
             }
             flocons.push(newFlake);
+        }
+    }
+
+    function updateFlakes() {
+        flocons.forEach(flocon => {
+            flocon.size = config.flakeSize + Math.random() * config.sizeVariation;
+            flocon.color = config.flakeColors[Math.floor(Math.random() * config.flakeColors.length)];
+            flocon.vX = Math.random() * config.maxHorizontalSpeed * 2 - config.maxHorizontalSpeed;
+            flocon.vY = Math.random() * config.maxVerticalSpeed + 0.5;
+        });
+    }
+
+    function adjustFlakeCount() {
+        const currentFlakeCount = flocons.length;
+        if (config.maxFlakes > currentFlakeCount) {
+            for (let i = currentFlakeCount; i < config.maxFlakes; i++) {
+                const newFlake = createFlocon(h1Elements, config, canvas);
+                flocons.push(newFlake);
+            }
+        } else if (config.maxFlakes < currentFlakeCount) {
+            flocons = flocons.slice(0, config.maxFlakes);
         }
     }
 
@@ -136,7 +139,7 @@ window.snowStorm = (function (window, document) {
             flocons.forEach(flocon => {
                 if (flocon.active && !flocon.accumule) {
                     const dx = e.clientX - flocon.x;
-                    flocon.vX += dx * 0.01; // Attraction vers la souris
+                    flocon.vX += dx * 0.01;
                     flocon.vX = Math.max(-config.maxHorizontalSpeed, Math.min(config.maxHorizontalSpeed, flocon.vX));
                 }
             });
@@ -145,34 +148,32 @@ window.snowStorm = (function (window, document) {
 
     function start() {
         if (config.disableOnMobile && isMobile) return;
-        if (animationFrameId) return; // Ne pas relancer si une animation est déjà active
-        createCanvas(config);
+        if (animationFrameId) return;
+        if (!canvas) {
+            createCanvas(config);
+        } else {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
         updateH1Elements();
         initFlocons();
         animer(flocons, accumulatedSnow, config, verifierCollision, recycleFlocon, positionnementStrategique, ctx, canvas, windOffset, h1Elements, documentHeight);
 
-        window.removeEventListener('resize', handleResize);
         window.addEventListener('resize', handleResize);
-
-        window.removeEventListener('scroll', updateH1Elements);
         window.addEventListener('scroll', updateH1Elements);
-
         if (config.mouseInteraction) {
-            window.removeEventListener('mousemove', handleMouseMove);
             window.addEventListener('mousemove', handleMouseMove);
         }
     }
 
     function stop() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+        if (canvas) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
-
-        // Supprimer les écouteurs d'événements
         window.removeEventListener('resize', handleResize);
         window.removeEventListener('scroll', updateH1Elements);
         if (config.mouseInteraction) {
@@ -181,22 +182,38 @@ window.snowStorm = (function (window, document) {
     }
 
     function restart() {
-        stop();  // Arrête l’animation
-        start(); // Redémarre l’animation
+        stop();
+        start();
     }
 
-    // Nouvelle fonction pour mettre à jour la configuration dynamiquement
     function updateConfig(newConfig) {
-        // Fusionner avec les nouveaux paramètres
+        const oldConfig = { ...config };
         config = { ...config, ...newConfig };
 
-        // Arrêter l'animation dans tous les cas
-        stop();
+        const shouldStartNow = checkShouldStart(config);
+        const wasRunning = !!animationFrameId;
 
-        // Redémarrer uniquement si les conditions sont remplies
-        if (checkShouldStart(config)) {
-            console.log('Restart animation...');
+        if (!shouldStartNow) {
+            stop();
+            return;
+        }
+
+        if (!wasRunning) {
             start();
+            return;
+        }
+
+        // Mise à jour sans arrêter l'animation si elle était déjà en cours
+        updateFlakes();
+        if (config.maxFlakes !== oldConfig.maxFlakes) {
+            adjustFlakeCount();
+        }
+        if (config.mouseInteraction !== oldConfig.mouseInteraction) {
+            if (config.mouseInteraction) {
+                window.addEventListener('mousemove', handleMouseMove);
+            } else {
+                window.removeEventListener('mousemove', handleMouseMove);
+            }
         }
     }
 
