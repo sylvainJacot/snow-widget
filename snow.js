@@ -164,6 +164,11 @@ window.snowStorm = (function (window, document) {
     }
 
     function stop() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
 
