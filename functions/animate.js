@@ -13,7 +13,7 @@ const drawFlake = (flake, yOffset, ctx, offscreenCanvas, config) => {
 // Création d'un canvas hors écran pour les emojis (une seule fois)
 const createOffscreenCanvas = (config) => {
     const offscreenCanvas = document.createElement('canvas');
-    const size = 20;
+    const size = 30;
     offscreenCanvas.width = size;
     offscreenCanvas.height = size;
     const offscreenCtx = offscreenCanvas.getContext('2d');
