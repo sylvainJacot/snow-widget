@@ -22,14 +22,16 @@ const createOffscreenCanvas = (config) => {
     return offscreenCanvas;
 };
 
-// Variable globale pour le canvas hors écran
+// Variables globales
 let offscreenCanvas = null;
+let currentEmojiCharacter = '❄️'; // Initialisé avec la valeur par défaut
 
 // Fonction principale d'animation
 export function animer(flocons, accumulatedSnow, config, verifierCollision, recycleFlocon, positionnementStrategique, ctx, canvas, windOffset, h1Elements, documentHeight) {
-    // Initialiser le canvas hors écran si nécessaire
-    if (config.flakeShape === 'custom' && !offscreenCanvas) {
+    // Vérifier si l'emojiCharacter a changé ou si le canvas n'existe pas encore
+    if (config.flakeShape === 'custom' && (offscreenCanvas === null || config.emojiCharacter !== currentEmojiCharacter)) {
         offscreenCanvas = createOffscreenCanvas(config);
+        currentEmojiCharacter = config.emojiCharacter; // Mettre à jour la valeur actuelle
     }
 
     // Effacer le canvas
