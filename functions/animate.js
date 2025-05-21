@@ -93,5 +93,19 @@ export function animer(flocons, accumulatedSnow, config, verifierCollision, recy
     }
 
     // Boucle d'animation
-    requestAnimationFrame(() => animer(flocons, accumulatedSnow, config, verifierCollision, recycleFlocon, positionnementStrategique, ctx, canvas, windOffset, h1Elements, documentHeight));
+    animationFrameId = requestAnimationFrame(() =>
+        animer(
+            flocons,
+            accumulatedSnow,
+            config,
+            verifierCollision,
+            recycleFlocon,
+            positionnementStrategique,
+            ctx,
+            canvas,
+            windOffset,
+            h1Elements,
+            documentHeight
+        )
+    );
 }

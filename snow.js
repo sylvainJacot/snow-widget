@@ -192,17 +192,8 @@ window.snowStorm = (function (window, document) {
 
         const shouldStartNow = checkShouldStart(config);
         const wasRunning = !!animationFrameId;
-
-        if (!shouldStartNow) {
-            stop();
-            return;
-        }
-
-        if (!wasRunning) {
-            start();
-            return;
-        }
-
+        if (!shouldStartNow) { stop(); return; }
+        if (!wasRunning) { start(); return; }
         // Mise à jour sans arrêter l'animation si elle était déjà en cours
         updateFlakes();
         if (config.maxFlakes !== oldConfig.maxFlakes) {
