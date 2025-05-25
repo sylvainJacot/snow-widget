@@ -102,8 +102,13 @@ window.snowStorm = (function (window, document) {
 
     function updateFlakes() {
         flocons.forEach(flocon => {
-            flocon.size = config.flakeSize + Math.random() * config.sizeVariation;
-            flocon.color = config.flakeColors[Math.floor(Math.random() * config.flakeColors.length)];
+            // Ne mettre à jour que les propriétés nécessaires
+            if (config.flakeSize !== flocon.size - Math.random() * config.sizeVariation) {
+                flocon.size = config.flakeSize + Math.random() * config.sizeVariation;
+            }
+            if (config.flakeColors.length > 0) {
+                flocon.color = config.flakeColors[Math.floor(Math.random() * config.flakeColors.length)];
+            }
             flocon.vX = Math.random() * config.maxHorizontalSpeed * 2 - config.maxHorizontalSpeed;
             flocon.vY = Math.random() * config.maxVerticalSpeed + 0.5;
         });
@@ -113,7 +118,7 @@ window.snowStorm = (function (window, document) {
         const currentFlakeCount = flocons.length;
         if (config.maxFlakes > currentFlakeCount) {
             for (let i = currentFlakeCount; i < config.maxFlakes; i++) {
-                const newFlake = createFlocon(h1Elements, config, canvas);
+                const newFlake = recycleFlocon(config, {}, positionnementStrategique, accumulatedSnow); // Réutiliser un flocon
                 flocons.push(newFlake);
             }
         } else if (config.maxFlakes < currentFlakeCount) {
@@ -200,12 +205,23 @@ window.snowStorm = (function (window, document) {
             }
         }
     }
+    // Fonction de debounce
+    function debounce(func, delay) {
+        let debounceTimeout;
+        return function (...args) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    // Créer une version debounced de updateConfig
+    const debouncedUpdateConfig = debounce(updateConfig, 500);
 
     return {
         start,
         stop,
         restart,
-        updateConfig,
+        updateConfig: debouncedUpdateConfig,
         get config() { return config; }
     };
 })(window, document);

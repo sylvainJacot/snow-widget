@@ -26,7 +26,7 @@ const createOffscreenCanvas = (config) => {
 let offscreenCanvas = null;
 let currentEmojiCharacter = '❄️'; // Initialisé avec la valeur par défaut
 
-// Fonction principale d'animation
+
 export function animer(flocons, accumulatedSnow, config, verifierCollision, recycleFlocon, positionnementStrategique, ctx, canvas, windOffset, h1Elements, documentHeight) {
     // Vérifier si l'emojiCharacter a changé ou si le canvas n'existe pas encore
     if (config.flakeShape === 'custom' && (offscreenCanvas === null || config.emojiCharacter !== currentEmojiCharacter)) {
@@ -38,10 +38,11 @@ export function animer(flocons, accumulatedSnow, config, verifierCollision, recy
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.globalAlpha = config.opacity;
 
-    // Calculer la plage visible
+    // Précalculer les constantes
     const viewTop = window.scrollY;
     const viewBottom = viewTop + window.innerHeight;
     const visibleRange = { top: viewTop - 100, bottom: viewBottom + 100 };
+    const maxHorizontalOffset = config.maxHorizontalSpeed * 2;
 
     // Limiter la taille de accumulatedSnow
     const maxAccumulated = 1000;
@@ -61,7 +62,7 @@ export function animer(flocons, accumulatedSnow, config, verifierCollision, recy
             flocon.x += flocon.vX * windOffset;
             flocon.y += flocon.vY;
 
-            if (flocon.y > documentHeight || flocon.x < -50 || flocon.x > canvas.width + 50) {
+            if (flocon.y > documentHeight || flocon.x < -maxHorizontalOffset || flocon.x > canvas.width + maxHorizontalOffset) {
                 recycleFlocon(config, flocon, positionnementStrategique, accumulatedSnow);
             } else {
                 if (flocon.y >= visibleRange.top && flocon.y <= visibleRange.bottom) {

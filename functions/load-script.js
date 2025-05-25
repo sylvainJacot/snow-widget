@@ -33,7 +33,8 @@ async function fetchConfig(token) {
 
     // Check if the domain is authorized
     const currentDomain = window.location.hostname;
-    if (data.allowedDomain && currentDomain !== 'localhost' && currentDomain !== data.allowedDomain) {
+
+    if (data.allowedDomain && currentDomain !== 'localhost' && currentDomain !== '127.0.0.1' && currentDomain !== data.allowedDomain) {
         throw new Error('Domain not authorized');
     }
 
