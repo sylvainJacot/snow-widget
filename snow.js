@@ -24,6 +24,7 @@ window.snowStorm = (function (window, document) {
         endDate: null,
         disableOnMobile: true,
         useGPU: true,
+        allowedDomain: null,
         zIndex: 9999
     };
 
@@ -37,6 +38,7 @@ window.snowStorm = (function (window, document) {
 
     function checkShouldStart(configParam) {
         const withinLifetime = isWithinLifetime(configParam);
+
         const shouldAutoStart = configParam.autoStart === true;
         const notDisabledOnMobile = !configParam.disableOnMobile || !isMobile;
         return withinLifetime && shouldAutoStart && notDisabledOnMobile;
@@ -44,15 +46,6 @@ window.snowStorm = (function (window, document) {
 
     (async function () {
         config = await loadConfig(defaultConfig);
-        console.group('%c loadConfig', 'color: white; background-color:rgb(164, 27, 27); font-size: 15px');
-        console.log({
-            IS_WITHIN_LIFETIME: isWithinLifetime(config),
-            AUTO_START: config.autoStart,
-            DISABLE_ON_MOBILE: config.disableOnMobile,
-            IS_MOBILE: isMobile,
-            SHOULD_START: checkShouldStart(config),
-        });
-        console.groupEnd();
 
         if (checkShouldStart(config)) {
             start();
