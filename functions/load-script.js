@@ -31,9 +31,10 @@ async function fetchConfig(token) {
 
     if (data.allowedDomain && currentDomain !== 'localhost' && currentDomain !== '127.0.0.1' && currentDomain !== data.allowedDomain) {
         throw new Error('Domain not authorized');
+    } else {
+        return data;
     }
 
-    return data;
 }
 
 // Charger la configuration dynamiquement
