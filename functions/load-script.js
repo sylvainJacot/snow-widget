@@ -29,11 +29,17 @@ async function fetchConfig(token) {
     // Check if the domain is authorized
     const currentDomain = window.location.hostname;
 
-    if (data.allowedDomain && currentDomain !== 'localhost' && currentDomain !== '127.0.0.1' && currentDomain !== data.allowedDomain) {
-        throw new Error('Domain not authorized');
-    } else {
-        return data;
+    // Si allowedDomain est défini (même vide), vérifier l'autorisation du domaine
+    if (data.hasOwnProperty('allowedDomain')) {
+        // Autoriser localhost et 127.0.0.1 pour le dev
+        if (currentDomain !== 'localhost' && currentDomain !== '127.0.0.1') {
+            // Si allowedDomain est vide ou ne correspond pas au domaine actuel
+            if (!data.allowedDomain || currentDomain !== data.allowedDomain) {
+                throw new Error('Domain not authorized');
+            }
+        }
     }
+    return data;
 
 }
 
@@ -50,7 +56,7 @@ export async function loadConfig(defaultConfig) {
         try {
             userConfig = await fetchConfig(params.token);
             if (!userConfig) {
-                throw new Error('Invalid token');
+                throw new Error('Configuration not found');
             }
         } catch (error) {
             throw error;
